@@ -28,7 +28,7 @@ CSS = """
 }
 .block-container {padding-top: 24px; padding-bottom: 24px; max-width: 1300px;}
 .hero h1 {font-size: var(--h1); font-weight: 700; margin: 0 0 18px 0;}
-.left-panel {border: 1px solid var(--border-color); border-radius: var(--panel-radius); padding: 8px; background: #fff; min-height: 400px; display: flex; align-items: center; justify-content: center; flex-direction: column; overflow: hidden;}
+.left-panel {border: 1px solid var(--border-color); border-radius: var(--panel-radius); padding: 8px; background: #fff; height: 400px; display: flex; align-items: center; justify-content: center; flex-direction: column; overflow: auto;}
 .dropzone {border: 2px dashed #d1d5db; border-radius: 16px; min-height: 360px; display: flex; align-items: center; justify-content: center; text-align: center; color: #111827; background: #fcfcfd;}
 .dropzone h3 {font-size: 24px; margin: 8px 0;}
 .dropzone p { color: #6b7280; margin: 8px 0 18px; }
@@ -167,7 +167,8 @@ with left:
         <div class="left-panel">
             <div style="
                 border-radius: 16px; 
-                height: 256px; 
+                min-height: {max(256, int(256 * st.session_state.zoom))}px;
+                min-width: {max(400, int(400 * st.session_state.zoom))}px;
                 display: flex; 
                 align-items: center; 
                 justify-content: center; 
