@@ -48,10 +48,29 @@ a.reset-link { font-size: 13px; color: #6b7280; text-decoration: underline; floa
 .actions { display: flex; gap: 12px; }
 button[data-testid="baseButton-primary"] { background: #19c1ff !important; color: #fff !important; border-radius: 999px !important; height: 42px; font-weight: 600; }
 button.download-btn { background: #e5e7eb !important; color: #111827 !important; border-radius: 999px !important; height: 42px; font-weight: 600; }
+/* Zoom buttons styling */
+[data-testid="column"] button[data-testid="baseButton-secondary"] { 
+    background: #f8fafc !important; 
+    color: #374151 !important; 
+    border: 1px solid #e5e7eb !important; 
+    border-radius: 8px !important; 
+    height: 36px !important; 
+    font-size: 18px !important; 
+    font-weight: 600 !important; 
+    transition: all 0.2s ease !important;
+}
+[data-testid="column"] button[data-testid="baseButton-secondary"]:hover { 
+    background: #e2e8f0 !important; 
+    border-color: #cbd5e1 !important; 
+}
 .preview-wrap { border: 1px dashed #e5e7eb; border-radius: 16px; height: 256px; display:flex; align-items:center; justify-content:center; background:#fff; }
 .toolbar { display:flex; align-items:center; gap:10px; justify-content:center; margin-top: 10px; color:#111827;}
 .toolbar button { background:#f1f5f9; border:1px solid #e5e7eb; border-radius:8px; padding:6px 10px;}
 .zoom-label { min-width: 60px; text-align: center; }
+.zoom-controls { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; }
+.zoom-btn { min-width: 36px; height: 36px; border-radius: 8px; border: 1px solid #e5e7eb; background: #f8fafc; color: #374151; font-size: 18px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.zoom-btn:hover { background: #e2e8f0; border-color: #cbd5e1; }
+.zoom-display { min-width: 60px; padding: 8px 12px; text-align: center; font-weight: 500; color: #374151; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; }
 </style>
 """
 st.markdown(CSS, unsafe_allow_html=True)
@@ -184,16 +203,46 @@ with left:
         """
         st.markdown(html_default, unsafe_allow_html=True)
 
-    # Zoom controls (chỉ hiển thị khi có SVG)
+    # Zoom controls (chỉ hiển thị khi có SVG) - chỉ chiếm 1/2 chiều rộng
     if st.session_state.svg:
-        z1, z2, z3 = st.columns([0.45, 0.1, 0.45])
-        with z2:
-            colb1, colb2, colb3 = st.columns([1,1,1])
-            if colb1.button("−"):
-                st.session_state.zoom = max(0.2, st.session_state.zoom - 0.1)
-            colb2.markdown(f"<div class='zoom-label'>{int(st.session_state.zoom*100)}%</div>", unsafe_allow_html=True)
-            if colb3.button("+"):
-                st.session_state.zoom = min(4.0, st.session_state.zoom + 0.1)
+        st.markdown('<div style="margin-top: 16px;"></div>', unsafe_allow_html=True)
+        
+        # Tạo bố cục để zoom controls chỉ chiếm 1/2 chiều rộng cột trái
+        empty1, zoom_container, empty2 = st.columns([1, 2, 1])
+        
+        with zoom_container:
+            # Tạo 3 cột nhỏ trong container zoom
+            zcol1, zcol2, zcol3 = st.columns([1, 1, 1])
+            
+            with zcol1:
+                if st.button("−", key="zoom_minus", help="Zoom out", use_container_width=True):
+                    st.session_state.zoom = max(0.2, st.session_state.zoom - 0.1)
+                    st.rerun()
+            
+            with zcol2:
+                st.markdown(f"""
+                <div style="
+                    text-align: center; 
+                    padding: 0; 
+                    background: #fff; 
+                    border: 1px solid #e5e7eb; 
+                    border-radius: 6px; 
+                    font-weight: 500; 
+                    color: #374151;
+                    margin: 0 2px;
+                    line-height: 36px;
+                    font-size: 14px;
+                    height: 36px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                ">{int(st.session_state.zoom*100)}%</div>
+                """, unsafe_allow_html=True)
+            
+            with zcol3:
+                if st.button("＋", key="zoom_plus", help="Zoom in", use_container_width=True):
+                    st.session_state.zoom = min(4.0, st.session_state.zoom + 0.1)
+                    st.rerun()
 
 # RIGHT: params
 with right:
@@ -224,6 +273,10 @@ with right:
 
     st.write("")
     c1, c2 = st.columns(2)
+    
+    # Initialize process variable
+    process = False
+    
     with c1:
         if st.session_state.svg:
             # Nút Reset để upload ảnh mới
@@ -231,7 +284,7 @@ with right:
             if reset:
                 st.session_state.svg = None
                 st.session_state.zoom = 1.0
-                st.experimental_rerun()
+                st.rerun()
         else:
             st.button("Download", disabled=True, use_container_width=True)
     with c2:
@@ -271,7 +324,7 @@ if process:
                 """
                 st.markdown(auto_download_script, unsafe_allow_html=True)
                 
-                st.experimental_rerun()
+                st.rerun()
         except Exception as e:
             st.error("Conversion failed.")
             with st.expander("Details"):
