@@ -28,7 +28,7 @@ CSS = """
 }
 .block-container {padding-top: 24px; padding-bottom: 24px; max-width: 1300px;}
 .hero h1 {font-size: var(--h1); font-weight: 700; margin: 0 0 18px 0;}
-.left-panel {border: 1px solid var(--border-color); border-radius: var(--panel-radius); padding: 28px; background: #fff; min-height: 400px; display: flex; align-items: center; justify-content: center; flex-direction: column;}
+.left-panel {border: 1px solid var(--border-color); border-radius: var(--panel-radius); padding: 8px; background: #fff; min-height: 400px; display: flex; align-items: center; justify-content: center; flex-direction: column;}
 .dropzone {border: 2px dashed #d1d5db; border-radius: 16px; min-height: 360px; display: flex; align-items: center; justify-content: center; text-align: center; color: #111827; background: #fcfcfd;}
 .dropzone h3 {font-size: 24px; margin: 8px 0;}
 .dropzone p { color: #6b7280; margin: 8px 0 18px; }
@@ -162,12 +162,31 @@ with left:
     uploaded_file = st.session_state.get('up')
     
     if st.session_state.svg:
-        # Hiển thị kết quả SVG trong left-panel
+        # Hiển thị kết quả SVG trong left-panel (không có border dash)
         html_svg = f"""
         <div class="left-panel">
-            <div class="preview-wrap">
-                <div id="canvas" style="transform:scale({st.session_state.zoom});transform-origin:center center;">
-                    <object type="image/svg+xml" data="data:image/svg+xml;base64,{base64.b64encode(st.session_state.svg.encode("utf-8")).decode("ascii")}" style="max-width:100%;max-height:256px"></object>
+            <div style="
+                border-radius: 16px; 
+                height: 256px; 
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                background: #fff;
+                overflow: visible;
+                position: relative;
+            ">
+                <div id="canvas" style="
+                    transform: scale({st.session_state.zoom}); 
+                    transform-origin: center center;
+                    width: 240px;
+                    height: 240px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                ">
+                    <object type="image/svg+xml" 
+                            data="data:image/svg+xml;base64,{base64.b64encode(st.session_state.svg.encode("utf-8")).decode("ascii")}" 
+                            style="width: 100%; height: 100%; object-fit: contain;"></object>
                 </div>
             </div>
         </div>
