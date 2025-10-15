@@ -1,4 +1,3 @@
-
 import base64
 import io
 import os
@@ -258,7 +257,7 @@ with left:
                              help="Download the converted SVG file")
     else:
         # Trước khi convert - hiển thị file uploader
-        uploaded = st.file_uploader("", type=["png","jpg","jpeg"], key="up")
+        uploaded = st.file_uploader("", type=["png","jpg","jpeg"], key="up", label_visibility="hidden")
     
     # Khung preview hiển thị sau khi upload
     uploaded_file = st.session_state.get('up')
