@@ -490,23 +490,6 @@ with right:
     </div>
     """, unsafe_allow_html=True)
 
-    # Help buttons: Open on GitHub or download the local notebook
-    help_path = Path("help.ipynb")
-    help_bytes = None
-    if help_path.exists():
-        help_bytes = help_path.read_bytes()
-
-    help_col1, help_col2 = st.columns([1, 1])
-    with help_col1:
-        if help_bytes:
-            st.download_button("Download help.ipynb", data=help_bytes, file_name="help.ipynb", mime="application/octet-stream", use_container_width=True)
-        else:
-            st.button("Download help.ipynb", disabled=True, use_container_width=True)
-    with help_col2:
-        # Link to GitHub blob (opens in new tab)
-        github_help_url = "https://github.com/QUOCVIETHIEU/svg_converter/blob/main/help.ipynb"
-        st.markdown(f"<a href=\"{github_help_url}\" target=\"_blank\"><button style=\"width:100%;height:38px;border-radius:6px;background:#f3f4f6;border:1px solid #e5e7eb;\">Open help on GitHub</button></a>", unsafe_allow_html=True)
-
     p = st.session_state.params
 
     # Chia parameters thành 2 cột
