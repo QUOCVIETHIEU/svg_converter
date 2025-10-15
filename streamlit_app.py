@@ -502,8 +502,32 @@ with right:
 
     st.write("")
     
-    # Nút Process - disable khi đã convert xong
-    process = st.button("Process", type="primary", use_container_width=True, disabled=is_disabled)
+    # Nút Process - disable khi đã convert xong hoặc chưa upload file
+    uploaded_file = st.session_state.get('up')
+    is_process_disabled = is_disabled or uploaded_file is None
+    
+    process = st.button("Process", type="primary", use_container_width=True, disabled=is_process_disabled)
     if process:
         st.session_state.process_started = True
         st.rerun()
+
+
+st.markdown("""
+<div style="
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #f9f9f9;
+    border-top: 1px solid #e0e0e0;
+    text-align: center;
+    padding: 10px 0;
+    color: #666;
+    font-size: 0.85em;
+    z-index: 1000;
+    box-shadow: none;
+    backdrop-filter: none;
+">
+    <p style="margin: 0;">Copyright © hieuvoquoc@gmail.com (V1.02 - SVG Converter)</p>
+</div>
+""", unsafe_allow_html=True)
