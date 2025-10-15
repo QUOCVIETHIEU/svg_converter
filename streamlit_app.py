@@ -192,7 +192,26 @@ if "zoom" not in st.session_state:
     st.session_state.zoom = 1.0
 
 # ---------------- Header ----------------
-st.markdown('<div class="hero"><h1>Convert your image to an SVG</h1></div>', unsafe_allow_html=True)
+# Đọc và hiển thị icon với tiêu đề
+try:
+    import base64
+    with open("assets/app_launcher.svg", "rb") as f:
+        icon_data = f.read()
+    icon_b64 = base64.b64encode(icon_data).decode()
+    
+    st.markdown(f'''
+    <div class="hero">
+        <h1 style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+            <img src="data:image/svg+xml;base64,{icon_b64}" 
+                 style="width: 96px; height: auto;" 
+                 alt="App Icon">
+            Convert your image to an SVG
+        </h1>
+    </div>
+    ''', unsafe_allow_html=True)
+except FileNotFoundError:
+    # Fallback nếu không tìm thấy icon
+    st.markdown('<div class="hero"><h1>Convert your image to an SVG</h1></div>', unsafe_allow_html=True)
 
 # ---------------- Layout ----------------
 left, right = st.columns([1.25, 1])
