@@ -268,6 +268,90 @@ with left:
                     st.session_state.zoom = min(4.0, st.session_state.zoom + 0.1)
                     st.rerun()
 
+    # Progress bar placeholder trong left column
+    progress_placeholder = st.empty()
+    
+    # Processing logic trong left column
+    uploaded_file = st.session_state.get('up')
+    if st.session_state.get('process_started', False):
+        if not uploaded_file:
+            progress_placeholder.warning("Please upload an image first.")
+        elif not CONVERTER_PATH.exists():
+            progress_placeholder.error(f"Converter script not found at: {CONVERTER_PATH}")
+        else:
+            try:
+                # Show progress bar in left column
+                progress_html = """
+                <div style="
+                    background: #f8fafc; 
+                    border: 1px solid #e2e8f0; 
+                    border-radius: 12px; 
+                    padding: 8px; 
+                    margin: 8px 0;
+                    text-align: center;
+                ">
+                    <div style="color: #374151; font-weight: 600; margin-bottom: 12px; font-size: 16px;">
+                        ⚛ Processing your image...
+                    </div>
+                    <div style="
+                        width: 100%; 
+                        height: 4px; 
+                        background: #e2e8f0; 
+                        border-radius: 4px; 
+                        overflow: hidden;
+                        position: relative;
+                    ">
+                        <div style="
+                            height: 100%; 
+                            background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%); 
+                            border-radius: 4px;
+                            animation: progress-animation 2s ease-in-out infinite;
+                            width: 100%;
+                        "></div>
+                    </div>
+                </div>
+                <style>
+                @keyframes progress-animation {
+                    0% { width: 0%; }
+                    50% { width: 70%; }
+                    100% { width: 100%; }
+                }
+                </style>
+                """
+                progress_placeholder.markdown(progress_html, unsafe_allow_html=True)
+                
+                # Process the conversion
+                svg_text, log = convert_with_params(uploaded_file.read(), st.session_state.params)
+                
+                # Clear progress bar from left column
+                progress_placeholder.empty()
+                
+                # Update session state
+                st.session_state.svg = svg_text
+                st.session_state.zoom = 1.0
+                st.session_state.process_started = False
+                
+                # Tự động download SVG sau khi convert xong
+                svg_b64 = base64.b64encode(svg_text.encode("utf-8")).decode("ascii")
+                auto_download_script = f"""
+                <script>
+                    const link = document.createElement('a');
+                    link.href = 'data:image/svg+xml;base64,{svg_b64}';
+                    link.download = 'converted_image.svg';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                </script>
+                """
+                st.markdown(auto_download_script, unsafe_allow_html=True)
+                
+                st.rerun()
+            except Exception as e:
+                progress_placeholder.error("Conversion failed.")
+                with st.expander("Details"):
+                    st.code(str(e))
+                st.session_state.process_started = False
+
 # RIGHT: params
 with right:
     st.markdown("""
@@ -319,37 +403,6 @@ with right:
                                use_container_width=True)
         else:
             process = st.button("Process", type="primary", use_container_width=True)
-
-# ---------------- Actions ----------------
-uploaded_file = st.session_state.get('up')
-if process:
-    if not uploaded_file:
-        st.warning("Please upload an image first.")
-    elif not CONVERTER_PATH.exists():
-        st.error(f"Converter script not found at: {CONVERTER_PATH}")
-    else:
-        try:
-            with st.spinner("Processing…"):
-                svg_text, log = convert_with_params(uploaded_file.read(), st.session_state.params)
-                st.session_state.svg = svg_text
-                st.session_state.zoom = 1.0
-                
-                # Tự động download SVG sau khi convert xong
-                svg_b64 = base64.b64encode(svg_text.encode("utf-8")).decode("ascii")
-                auto_download_script = f"""
-                <script>
-                    const link = document.createElement('a');
-                    link.href = 'data:image/svg+xml;base64,{svg_b64}';
-                    link.download = 'converted_image.svg';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                </script>
-                """
-                st.markdown(auto_download_script, unsafe_allow_html=True)
-                
+            if process:
+                st.session_state.process_started = True
                 st.rerun()
-        except Exception as e:
-            st.error("Conversion failed.")
-            with st.expander("Details"):
-                st.code(str(e))
