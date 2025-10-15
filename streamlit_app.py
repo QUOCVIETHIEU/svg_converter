@@ -2,6 +2,7 @@ import base64
 import io
 import os
 import re
+import sys
 import subprocess
 import tempfile
 from pathlib import Path
@@ -9,7 +10,6 @@ from pathlib import Path
 import streamlit as st
 
 # ---------------- Config ----------------
-st.set_page_config(page_title="PNG → SVG", layout="wide")
 st.set_page_config(
     page_title="PNG → SVG", 
     page_icon="assets/icon_launcher.png", 
@@ -137,9 +137,6 @@ def _svg_component(svg_text: str, scale: float=1.0, height=256):
     </div>
     """
     st.components.v1.html(html, height=height+6, scrolling=False)
-
-import sys
-
 
 def run_cli(args):
     # Ensure subprocess uses the same Python interpreter as the Streamlit process
