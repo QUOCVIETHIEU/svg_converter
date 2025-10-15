@@ -103,6 +103,19 @@ button.download-btn { background: #e5e7eb !important; color: #111827 !important;
     transform: translateY(-1px) !important;
     box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4) !important;
 }
+
+/* Hide Streamlit default header and anchor links in headings */
+[data-testid="stHeaderActionElements"],
+[data-testid="stHeadingWithActionElements"] a,
+h1 a[href^="#"],
+h2 a[href^="#"],
+h3 a[href^="#"],
+h4 a[href^="#"],
+h5 a[href^="#"],
+h6 a[href^="#"] {
+  display: none !important;
+  pointer-events: none !important;
+}
 </style>"""
 st.markdown(CSS, unsafe_allow_html=True)
 
