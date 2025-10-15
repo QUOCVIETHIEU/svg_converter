@@ -201,10 +201,18 @@ with left:
                 st.rerun()
             
         with action_col2:
-            # Nút Download giống như nút Process
+            # Nút Download giống như nút Process - dùng tên file gốc
+            uploaded_file = st.session_state.get('up')
+            if uploaded_file:
+                # Lấy tên file gốc và thay extension thành .svg
+                original_name = uploaded_file.name
+                svg_filename = original_name.rsplit('.', 1)[0] + '.svg'
+            else:
+                svg_filename = "converted_image.svg"
+                
             st.download_button("Download File", 
                              data=st.session_state.svg.encode("utf-8"),
-                             file_name="output.svg", 
+                             file_name=svg_filename, 
                              mime="image/svg+xml",
                              use_container_width=True,
                              type="primary",
@@ -249,8 +257,21 @@ with left:
         """
         st.markdown(html_svg, unsafe_allow_html=True)
         
-        # Custom styled success message
-        st.markdown("""
+        # Custom styled success message với thông tin file input gốc
+        uploaded_file = st.session_state.get('up')
+        if uploaded_file:
+            file_name = uploaded_file.name
+            # Lấy kích thước file input gốc
+            file_size_kb = uploaded_file.size / 1024
+            if file_size_kb < 1024:
+                size_text = f" ({file_size_kb:.1f}KB)"
+            else:
+                size_text = f" ({file_size_kb/1024:.1f}MB)"
+        else:
+            file_name = "image"
+            size_text = "unknown"
+            
+        st.markdown(f"""
         <div style="
             background: linear-gradient(135deg, #d1fae5 0%, #ecfdf5 100%); 
             border: 0.5px solid #10b981; 
@@ -270,7 +291,7 @@ with left:
                 color: #047857; 
                 font-weight: 600; 
                 font-size: 15px;
-            ">Conversion completed!</div>
+            ">Conversion completed file '{file_name}' {size_text}.</div>
         </div>
         """, unsafe_allow_html=True)
     elif uploaded_file:
@@ -319,28 +340,18 @@ with left:
                     st.rerun()
             
             with zcol2:
-                st.markdown(f"""
-                <div style="
-                    text-align: center; 
-                    padding: 0; 
-                    background: #fff; 
-                    border: 1px solid #e5e7eb; 
-                    border-radius: 6px; 
-                    font-weight: 500; 
-                    color: #374151;
-                    margin: 0 2px;
-                    line-height: 36px;
-                    font-size: 14px;
-                    height: 36px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                ">{int(st.session_state.zoom*100)}%</div>
-                """, unsafe_allow_html=True)
+                # Button để reset zoom về 100% khi click
+                zoom_reset = st.button(f"{int(st.session_state.zoom*100)}%", 
+                                     key="zoom_reset", 
+                                     help="Click to reset zoom to 100%",
+                                     use_container_width=True)
+                if zoom_reset:
+                    st.session_state.zoom = 1.0
+                    st.rerun()
             
             with zcol3:
                 if st.button("＋", key="zoom_plus", help="Zoom in", use_container_width=True):
-                    st.session_state.zoom = min(4.0, st.session_state.zoom + 0.1)
+                    st.session_state.zoom = min(10.0, st.session_state.zoom + 0.1)
                     st.rerun()
 
     # Progress bar placeholder trong left column
