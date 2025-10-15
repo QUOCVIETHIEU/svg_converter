@@ -11,6 +11,13 @@ import streamlit as st
 
 # ---------------- Config ----------------
 st.set_page_config(page_title="PNG → SVG", layout="wide")
+st.set_page_config(
+    page_title="PNG → SVG", 
+    page_icon="assets/icon_launcher.png", 
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
 CONVERTER_PATH = Path("converter.py")  # change if your script name differs
 
 # ---------------- Styles ----------------
