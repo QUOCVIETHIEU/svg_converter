@@ -138,7 +138,13 @@ def _svg_component(svg_text: str, scale: float=1.0, height=256):
     """
     st.components.v1.html(html, height=height+6, scrolling=False)
 
+import sys
+
+
 def run_cli(args):
+    # Ensure subprocess uses the same Python interpreter as the Streamlit process
+    if args and args[0] == "python":
+        args[0] = sys.executable
     proc = subprocess.run(args, capture_output=True, text=True)
     return proc.returncode, proc.stdout, proc.stderr
 
