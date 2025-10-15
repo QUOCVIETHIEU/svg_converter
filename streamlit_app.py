@@ -173,7 +173,31 @@ with left:
         </div>
         """
         st.markdown(html_svg, unsafe_allow_html=True)
-        st.success("✅ Conversion completed! File auto-downloaded.")
+        
+        # Custom styled success message
+        st.markdown("""
+        <div style="
+            background: linear-gradient(135deg, #d1fae5 0%, #ecfdf5 100%); 
+            border: 0.5px solid #10b981; 
+            border-radius: 12px; 
+            padding: 16px 20px; 
+            margin: 16px 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px;
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);
+        ">
+            <div style="
+                font-size: 24px; 
+                line-height: 1;
+            ">✅</div>
+            <div style="
+                color: #047857; 
+                font-weight: 600; 
+                font-size: 15px;
+            ">Conversion completed!</div>
+        </div>
+        """, unsafe_allow_html=True)
     elif uploaded_file:
         # Hiển thị ảnh đã upload trong left-panel
         img_b64 = base64.b64encode(uploaded_file.read()).decode("ascii")
