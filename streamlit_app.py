@@ -48,6 +48,7 @@ a.reset-link { font-size: 13px; color: #6b7280; text-decoration: underline; floa
 .actions { display: flex; gap: 12px; }
 button[data-testid="baseButton-primary"] { background: #19c1ff !important; color: #fff !important; border-radius: 999px !important; height: 42px; font-weight: 600; }
 button.download-btn { background: #e5e7eb !important; color: #111827 !important; border-radius: 999px !important; height: 42px; font-weight: 600; }
+
 /* Zoom buttons styling */
 [data-testid="column"] button[data-testid="baseButton-secondary"] { 
     background: #f8fafc !important; 
@@ -71,8 +72,38 @@ button.download-btn { background: #e5e7eb !important; color: #111827 !important;
 .zoom-btn { min-width: 36px; height: 36px; border-radius: 8px; border: 1px solid #e5e7eb; background: #f8fafc; color: #374151; font-size: 18px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .zoom-btn:hover { background: #e2e8f0; border-color: #cbd5e1; }
 .zoom-display { min-width: 60px; padding: 8px 12px; text-align: center; font-weight: 500; color: #374151; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; }
-</style>
-"""
+/* Styling cho 2 nút Upload New và Download File */
+.upload-new-btn button[data-testid="baseButton-secondary"] { 
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important; 
+    color: #fff !important; 
+    border: none !important; 
+    border-radius: 999px !important; 
+    height: 42px !important; 
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3) !important;
+}
+.upload-new-btn button[data-testid="baseButton-secondary"]:hover { 
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important; 
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(245, 158, 11, 0.4) !important;
+}
+.download-file-btn button[data-testid="baseButton-secondary"] { 
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; 
+    color: #fff !important; 
+    border: none !important; 
+    border-radius: 999px !important; 
+    height: 42px !important; 
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3) !important;
+}
+.download-file-btn button[data-testid="baseButton-secondary"]:hover { 
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important; 
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4) !important;
+}
+</style>"""
 st.markdown(CSS, unsafe_allow_html=True)
 
 # ---------------- Helpers ----------------
@@ -155,8 +186,32 @@ left, right = st.columns([1.25, 1])
 
 # LEFT: upload + preview
 with left:
-    # File uploader hiển thị trước
-    uploaded = st.file_uploader("", type=["png","jpg","jpeg"], key="up")
+    # Hiển thị file uploader hoặc 2 nút tùy theo trạng thái
+    if st.session_state.svg:
+        # Sau khi convert - hiển thị 2 nút Upload New và Download (nhỏ gọn)
+        empty1, action_col1, gap, action_col2, empty2 = st.columns([1, 1.5, 0.2, 1.5, 1])
+        with action_col1:
+            # Nút Upload New
+            upload_clicked = st.button("Upload New", 
+                                     use_container_width=True,
+                                     help="Upload a new image")
+            if upload_clicked:
+                st.session_state.svg = None
+                st.session_state.zoom = 1.0
+                st.rerun()
+            
+        with action_col2:
+            # Nút Download giống như nút Process
+            st.download_button("Download File", 
+                             data=st.session_state.svg.encode("utf-8"),
+                             file_name="output.svg", 
+                             mime="image/svg+xml",
+                             use_container_width=True,
+                             type="primary",
+                             help="Download the converted SVG file")
+    else:
+        # Trước khi convert - hiển thị file uploader
+        uploaded = st.file_uploader("", type=["png","jpg","jpeg"], key="up")
     
     # Khung preview hiển thị sau khi upload
     uploaded_file = st.session_state.get('up')
@@ -385,44 +440,27 @@ with right:
     # Chia parameters thành 2 cột
     param_col1, param_col2 = st.columns(2)
     
+    # Disable parameters khi đã convert xong
+    is_disabled = st.session_state.svg is not None
+    
     with param_col1:
-        p["k"] = st.number_input("K:", min_value=1, max_value=64, value=int(p["k"]), step=1)
-        p["min_area"] = st.number_input("Min area:", min_value=0, value=int(p["min_area"]), step=10)
-        p["super_sample"] = st.number_input("Super sample:", min_value=1, max_value=8, value=int(p["super_sample"]), step=1)
-        p["morph_close"] = st.number_input("Morph close:", min_value=0, max_value=25, value=int(p["morph_close"]), step=1)
-        p["morph_open"]  = st.number_input("Morph open:",  min_value=0, max_value=25, value=int(p["morph_open"]), step=1)
+        p["k"] = st.number_input("K:", min_value=1, max_value=64, value=int(p["k"]), step=1, disabled=is_disabled)
+        p["min_area"] = st.number_input("Min area:", min_value=0, value=int(p["min_area"]), step=10, disabled=is_disabled)
+        p["super_sample"] = st.number_input("Super sample:", min_value=1, max_value=8, value=int(p["super_sample"]), step=1, disabled=is_disabled)
+        p["morph_close"] = st.number_input("Morph close:", min_value=0, max_value=25, value=int(p["morph_close"]), step=1, disabled=is_disabled)
+        p["morph_open"]  = st.number_input("Morph open:",  min_value=0, max_value=25, value=int(p["morph_open"]), step=1, disabled=is_disabled)
     
     with param_col2:
-        p["corner_eps"] = st.number_input("Corner eps:", min_value=0.0, max_value=5.0, value=float(p["corner_eps"]), step=0.05)
-        p["line_tol"]   = st.number_input("Line tol:",   min_value=0.0, max_value=1.0, value=float(p["line_tol"]), step=0.01)
-        p["max_err"]    = st.number_input("Max err:",    min_value=0.0, max_value=5.0, value=float(p["max_err"]), step=0.02)
-        p["curve_sigma"]= st.number_input("Curve sigma:", min_value=0.0, max_value=5.0, value=float(p["curve_sigma"]), step=0.1)
-        p["subpixel_sigma"] = st.number_input("Subpixel sigma:", min_value=0.0, max_value=5.0, value=float(p["subpixel_sigma"]), step=0.1)
+        p["corner_eps"] = st.number_input("Corner eps:", min_value=0.0, max_value=5.0, value=float(p["corner_eps"]), step=0.05, disabled=is_disabled)
+        p["line_tol"]   = st.number_input("Line tol:",   min_value=0.0, max_value=1.0, value=float(p["line_tol"]), step=0.01, disabled=is_disabled)
+        p["max_err"]    = st.number_input("Max err:",    min_value=0.0, max_value=5.0, value=float(p["max_err"]), step=0.02, disabled=is_disabled)
+        p["curve_sigma"]= st.number_input("Curve sigma:", min_value=0.0, max_value=5.0, value=float(p["curve_sigma"]), step=0.1, disabled=is_disabled)
+        p["subpixel_sigma"] = st.number_input("Subpixel sigma:", min_value=0.0, max_value=5.0, value=float(p["subpixel_sigma"]), step=0.1, disabled=is_disabled)
 
     st.write("")
-    c1, c2 = st.columns(2)
     
-    # Initialize process variable
-    process = False
-    
-    with c1:
-        if st.session_state.svg:
-            # Nút Reset để upload ảnh mới
-            reset = st.button("Upload New Image", use_container_width=True)
-            if reset:
-                st.session_state.svg = None
-                st.session_state.zoom = 1.0
-                st.rerun()
-        else:
-            st.button("Download", disabled=True, use_container_width=True)
-    with c2:
-        if st.session_state.svg:
-            # Nút Download manual
-            st.download_button("Download Again", data=st.session_state.svg.encode("utf-8"),
-                               file_name="output.svg", mime="image/svg+xml",
-                               use_container_width=True)
-        else:
-            process = st.button("Process", type="primary", use_container_width=True)
-            if process:
-                st.session_state.process_started = True
-                st.rerun()
+    # Nút Process - disable khi đã convert xong
+    process = st.button("Process", type="primary", use_container_width=True, disabled=is_disabled)
+    if process:
+        st.session_state.process_started = True
+        st.rerun()
