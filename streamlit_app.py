@@ -32,8 +32,9 @@ CSS = """
   --btn-muted: #e5e7eb;
   --h1: 42px;
 }
+body { padding-bottom: 80px; }
 .block-container {padding-top: 24px; padding-bottom: 24px; max-width: 1300px;}
-.hero h1 {font-size: var(--h1); font-weight: 700; margin: 0 0 18px 0;}
+.hero h1 {font-size: var(--h1); font-weight: 700; margin: 0 0 8px 0;}
 .left-panel {border: 1px solid var(--border-color); border-radius: var(--panel-radius); padding: 8px; background: #fff; height: 400px; display: flex; align-items: center; justify-content: center; flex-direction: column; overflow: auto;}
 .dropzone {border: 2px dashed #d1d5db; border-radius: 16px; min-height: 360px; display: flex; align-items: center; justify-content: center; text-align: center; color: #111827; background: #fcfcfd;}
 .dropzone h3 {font-size: 24px; margin: 8px 0;}
@@ -257,8 +258,7 @@ with left:
                              help="Download the converted SVG file")
     else:
         # Trước khi convert - hiển thị file uploader
-        uploaded = st.file_uploader("", type=["png","jpg","jpeg"], key="up", label_visibility="hidden")
-    
+        uploaded = st.file_uploader("Upload Image", type=["png","jpg","jpeg"], key="up", label_visibility="hidden")
     # Khung preview hiển thị sau khi upload
     uploaded_file = st.session_state.get('up')
     
@@ -410,7 +410,7 @@ with left:
                     background: #f8fafc; 
                     border: 1px solid #e2e8f0; 
                     border-radius: 12px; 
-                    padding: 8px; 
+                    padding: 8px 8px; 
                     margin: 8px 0;
                     text-align: center;
                 ">
@@ -527,7 +527,7 @@ st.markdown("""
     background: #f9f9f9;
     border-top: 1px solid #e0e0e0;
     text-align: center;
-    padding: 10px 0;
+    padding: 10px ;
     color: #666;
     font-size: 0.85em;
     z-index: 1000;
