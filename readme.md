@@ -1,71 +1,81 @@
-# Nhóm I/O & chế độ
-	--input: đường dẫn ảnh nguồn PNG/JPEG.
-	--output: file SVG xuất ra.
-	--mode {auto,color,mono}
-		•	auto: tự quyết số lớp màu (thường dựa heuristic).
-		•	color: ép dùng đúng k màu. Hợp với logo/phẳng.
-		•	mono: đen–trắng (threshold) → cho contour “sắc” nhất, dễ mài răng cưa.
+# Vectorization Engine CLI Options (English Documentation)
 
-	--k: Số cụm màu trong file gốc
-		•	Tăng: giữ nhiều sắc độ/chi tiết → nhiều path hơn, nặng file, dễ răng cưa nhẹ ở vùng biên lẫn màu.
-		•	Giảm: đơn giản hoá màu → mượt thị giác, ít path, hợp logo.
-		•	Gợi ý: logo 3–12; icon/flat 4–8; ảnh posterize 8–16; 50 là cao (chỉ khi cần chi tiết).
+## I/O Group & Modes
+- **--input:** Path to the source image (PNG/JPEG).
+- **--output:** Output SVG file path.
+- **--mode {auto, color, mono}**
+  - **auto:** Automatically determines the optimal number of color layers (heuristic-based).
+  - **color:** Forces exactly *k* color clusters. Ideal for logos or flat-style images.
+  - **mono:** Black–white threshold mode → produces the sharpest contours, best for anti-alias refinement.
 
-# Nhóm vùng ảnh / tiền xử lý
-	--min-area INT (mặc định 80 px²): Bỏ qua mảng nhỏ hơn ngưỡng.
-		•	Tăng: loại hạt bụi/nhỏ lẻ → SVG sạch & mượt hơn.
-		•	Giảm: giữ chi tiết li ti → dễ lởm chởm.
-		•	Logo: 50–300; scan nhiễu: 150–800.
+- **--k:** Number of color clusters in the source image
+  - **Increase:** Preserves more tonal variation/details → more paths, larger file, slight aliasing at color transitions.
+  - **Decrease:** Simplifies colors → smoother look, fewer paths, ideal for logos.
+  - **Recommendation:** Logos 3–12; flat/icons 4–8; posterized photos 8–16; 50+ only for high-detail use cases.
 
-	--area-max-ratio FLOAT (mặc định 0.92): Giới hạn tỷ lệ diện tích một vùng so với toàn ảnh
-		•	Tăng gần 1.0: dễ giữ mảng lớn (hậu cảnh), có thể làm thuật toán coi cả nền là một khối → khó mượt.
-		•	Giảm: mạnh tay coi mảng quá lớn là nền → contour tập trung vào đối tượng.
+---
 
-	--super-sample INT (SSAA, mặc định 4): Phóng to ảnh nội bộ trước khi dò biên rồi thu về (anti-alias)
-		•	Tăng: biên mịn thấy rõ (đặc biệt đường cong) nhưng tốn CPU/RAM.
-		•	Giảm: nhanh hơn, biên “bậc thang” hơn.
-		•	Logo: 3–6; ảnh lớn: 2–4.
-	
-	--decimate INT (mặc định 1): Lấy mẫu thưa bớt điểm contour đầu vào.
-		•	Tăng: ít điểm → path mượt hơn nhưng có nguy cơ mất chi tiết/gãy góc.
-		•	Giảm (về 1): giữ đủ điểm → mịn + đúng hình nhất, nhưng cần các bước mượt khác để tránh răng cưa.
-	
-	--no-auto-crop (flag): Tắt tự động cắt sát đối tượng. Auto-crop giúp tăng độ mượt (ít vùng rìa/nhiễu)
-	--crop x,y,w,h: Cắt thủ công. Dùng khi muốn tập trung vào vùng quan trọng để vector hoá mượt hơn.
-	--subpixel-sigma FLOAT (mặc định 0.8): Gaussian nhẹ trước khi lấy biên (mịn cận subpixel).
-		•	Tăng: bớt răng cưa, nhưng có thể bo tròn góc.
-		•	Giảm: sắc góc, dễ răng cưa; 0 = tắt.
-		•	Logo: 0.5–1.0; mono/scan nhiễu: 0.8–1.5.
+## Image Region / Pre-processing Group
+- **--min-area INT (default 80 px²):** Ignores regions smaller than this threshold.
+  - **Increase:** Removes dust/specks → cleaner, smoother SVG.
+  - **Decrease:** Keeps tiny details → may look noisy or jagged.
+  - **Typical:** Logo = 50–300; noisy scans = 150–800.
 
-# Nhóm “sửa chữa biên” (repair) & hình thái học
-	--no-repair (flag): Tắt bước hàn mép/điền lỗ nhỏ sau segment hoá. Tắt sẽ “trung thực” nhưng dễ lỗ châm kim, răng cưa.
-	
-	--repair-clean FLOAT (mặc định 0.01, theo kích thước ảnh): Ngưỡng hợp nhất/điền các khe nhỏ khi repair.
-		•	Tăng: mạnh tay làm sạch → mượt hơn, nhưng có thể dính mảng mỏng.
-		•	Giảm: ít can thiệp → nhiều khe nhỏ còn lại.
-	
-	--morph-close INT (mặc định 4, px): Closing (dilate rồi erode) lấp các khe đứt.
-		•	Tăng: bo mép, liền nét (mượt) nhưng có thể làm phình chi tiết nhỏ.
-		•	Giảm: ít lấp khe → giữ nét sắc, có thể răng cưa.
-	
-	--morph-open INT (mặc định 1, px): Opening (erode rồi dilate) loại nhiễu hạt nhỏ.
-		•	Tăng: sạch hơn, nhưng mất chi tiết mảnh.
-		•	Giảm: giữ chi tiết, dễ lạo xạo.
+- **--area-max-ratio FLOAT (default 0.92):** Limits a region’s area relative to the total image.
+  - **Increase (→ 1.0):** Keeps large areas (backgrounds) but may merge background into one block → harder to smooth.
+  - **Decrease:** Treats overly large regions as background → tighter focus on the main object.
 
-# Nhóm bắt thẳng/góc & sai số khớp (rất quan trọng cho độ mượt thị giác)
-	--corner-eps FLOAT (mặc định 0.9): Độ “nhạy” phát hiện góc.
-		•	Tăng: ít điểm góc → đường được coi là cong nhiều hơn → mượt hơn, nhưng có thể bo tròn góc đáng lẽ phải nhọn.
-		•	Giảm: nhiều điểm góc → góc sắc chính xác, nhưng có cảm giác “gãy khúc”.
-	
-	--line-tol FLOAT (mặc định 0.1): Dung sai để nhận ra một đoạn là đường thẳng (thay vì cong).
-		•	Tăng: dễ “snap” thành thẳng → biên phẳng, mượt thị giác ở logo có cạnh thẳng.
-		•	Giảm: ít đoạn thẳng → nhiều đoạn cong; mượt cong nhưng cạnh thẳng có thể lượn nhẹ.
-	
-	--max-err FLOAT (mặc định 0.26): Sai số khớp tối đa (fit error) khi xấp xỉ bằng đoạn thẳng/curve.
-		•	Tăng: bớt điểm điều khiển → path gọn, mượt tổng thể, nhưng có thể lệch hình nhỏ.
-		•	Giảm: bám hình sát → nhiều điểm điều khiển → có nguy cơ “răng cưa” thị giác.
+- **--super-sample INT (SSAA, default 4):** Supersampling factor — upscales internally before edge detection (anti-alias).
+  - **Increase:** Smoother, more accurate edges (especially curves) but higher CPU/RAM usage.
+  - **Decrease:** Faster but more “stair-stepped” edges.
+  - **Typical:** Logo = 3–6; large images = 2–4.
 
-# Nhóm làm mượt cong chỉ trong mono
-	--curve-sigma FLOAT (mặc định 1.4; 0 = tắt): Gaussian chỉ áp dụng trên đoạn cong (không ảnh hưởng cạnh thẳng).
-		•	Tăng: cong mượt rõ rệt, đặc biệt mono, hạn chế bậc thang. Quá cao có thể “lụn” chi tiết.
-		•	Giảm: giữ chi tiết cong sắc hơn.
+- **--decimate INT (default 1):** Downsamples input contour points.
+  - **Increase:** Fewer points → smoother path, but may lose detail or break corners.
+  - **Decrease (→ 1):** Retains all points → maximum fidelity; combine with smoothing to avoid jaggedness.
+
+- **--no-auto-crop (flag):** Disable automatic object cropping. Auto-crop improves smoothness by removing noisy borders.
+- **--crop x,y,w,h:** Manual crop. Useful to focus on key regions for better vectorization.
+- **--subpixel-sigma FLOAT (default 0.8):** Light Gaussian blur before edge detection (subpixel smoothing).
+  - **Increase:** Reduces aliasing but rounds corners.
+  - **Decrease:** Sharper corners, more aliasing; 0 = disabled.
+  - **Typical:** Logo = 0.5–1.0; mono/noisy scans = 0.8–1.5.
+
+---
+
+## Edge Repair & Morphology Group
+- **--no-repair (flag):** Disable automatic edge welding / small-hole filling after segmentation. Disabling preserves raw shapes but may leave pinholes or jagged edges.
+
+- **--repair-clean FLOAT (default 0.01, relative to image size):** Merge/fill threshold for minor gaps.
+  - **Increase:** Aggressively smooths edges, may merge thin areas.
+  - **Decrease:** Minimal cleanup, more small gaps remain.
+
+- **--morph-close INT (default 4 px):** Closing operation (dilate → erode) to fill small gaps.
+  - **Increase:** Stronger edge joining, smoother result but can inflate fine details.
+  - **Decrease:** Preserves sharp edges, possible small breaks.
+
+- **--morph-open INT (default 1 px):** Opening operation (erode → dilate) to remove small noise specks.
+  - **Increase:** Cleaner image, may erase thin features.
+  - **Decrease:** Keeps details but may appear grainy.
+
+---
+
+## Corner, Line, and Fit-Error Group (Critical for Visual Smoothness)
+- **--corner-eps FLOAT (default 0.9):** Corner detection sensitivity.
+  - **Increase:** Fewer detected corners → more curves → smoother but may round sharp corners.
+  - **Decrease:** More corners → sharper accuracy, but may look segmented.
+
+- **--line-tol FLOAT (default 0.1):** Tolerance to classify segments as straight lines.
+  - **Increase:** Easier snapping to straight lines → cleaner edges in logos.
+  - **Decrease:** Fewer straight lines, more curves → smoother curves but edges may bend slightly.
+
+- **--max-err FLOAT (default 0.26):** Maximum fitting error when approximating with line/curve segments.
+  - **Increase:** Fewer control points → compact, smooth overall path, possible slight shape deviation.
+  - **Decrease:** Closer fit → more control points → higher fidelity but risk of visible aliasing.
+
+---
+
+## Curve Smoothing (Mono-only)
+- **--curve-sigma FLOAT (default 1.4; 0 = disabled):** Gaussian smoothing applied to curved segments only.
+  - **Increase:** Noticeably smoother curves (especially in mono mode), minimizes stair-stepping. Too high may blur details.
+  - **Decrease:** Preserves sharp curvature; lower visual smoothness.
